@@ -1,16 +1,8 @@
 # 📝 WhiteBoard 1.0.0
 
-WhiteBoard is a local task board for Windows 10/11 x64. Keep projects, notes, and tasks in columns. Drag cards to move them. No account or server is needed.
+WhiteBoard is a task board for Windows 10/11 x64. Create a project, add task cards, and move them through status columns. Keep notes, set priorities, and see what needs work next.
 
-## 🚀 Install
-
-Download `WhiteBoard-1.0.0-x64.msi` from [Releases](https://github.com/frankintheocean/Whiteboard/releases). Open it and follow the steps. Windows asks for admin permission because the app installs in Program Files.
-
-Run the same MSI again to **Repair** or **Remove** the app. You can also remove it in Windows Settings → Apps. Repair restores missing app files. Uninstall keeps your projects and settings.
-
-The release ZIP has one root folder, `WhiteBoard-1.0.0/`. It contains all source, resources, build tools, docs, licenses, the built app, and the MSI when the Windows build passes. You can run `application/WhiteBoard/WhiteBoard.exe` without installing it.
-
-The app and MSI are unsigned. Windows may show a SmartScreen warning. Check the SHA-256 values in the release before using the files.
+Your projects stay on your computer. The app saves changes as you work and runs offline. No account or server is needed.
 
 ## 🗂️ Use your board
 
@@ -26,6 +18,16 @@ The app and MSI are unsigned. Windows may show a SmartScreen warning. Check the 
 - Pick from 10 themes. Adjust text, zoom, focus marks, click targets, and motion.
 
 See [the user guide](docs/USER_GUIDE.md) for details and keyboard shortcuts.
+
+## 🚀 Install
+
+Download `WhiteBoard-1.0.0-x64.msi` from [Releases](https://github.com/frankintheocean/Whiteboard/releases). Open it and follow the steps. Windows asks for admin permission because the app installs in Program Files.
+
+Run the same MSI again to **Repair** or **Remove** the app. You can also remove it in Windows Settings → Apps. Repair restores missing app files. Uninstall keeps your projects and settings.
+
+The release ZIP has one root folder, `WhiteBoard-1.0.0/`. It contains all source, resources, build tools, docs, licenses, the built app, and the MSI when the Windows build passes. You can run `application/WhiteBoard/WhiteBoard.exe` without installing it.
+
+The app and MSI are unsigned. Windows may show a SmartScreen warning. Check the SHA-256 values in the release before using the files.
 
 ## 🔤 Fonts and reading
 

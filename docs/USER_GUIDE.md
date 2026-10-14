@@ -30,6 +30,8 @@ Use checkboxes, Ctrl-click, or Shift-click to select cards. The group bar offers
 | Ctrl+Z | Undo a board change. |
 | Ctrl+Y / Ctrl+Shift+Z | Redo a board change. |
 | Escape | Clear selected cards. |
+| Ctrl+F | Search cards in all projects. |
+| Ctrl+K | Open the command palette. |
 | Ctrl+N | New card. |
 | Ctrl+O | Open a project. |
 | Ctrl+S | Quick Save to the remembered project file. |
@@ -54,6 +56,14 @@ An external copy may be older than your local board. WhiteBoard warns before clo
 If the footer says changes are not saved, keep the app open and check free space and folder permissions. Closing after a failed save asks before discarding changes.
 
 Unreadable files are kept as `.bak`, `.bak.1`, and later numbered copies. Do not edit a backup in place. Copy it elsewhere first. The Diagnostics tab shows recent errors and board counts. Its Clear Board action has its own Undo action.
+
+## 🧰 Use the new task tools
+
+The project toolbar has Board/List, a project filter, label and due-date filters, and saved views. Ctrl+F searches all projects. Ctrl+K finds actions, projects, and cards. Add labels, dates, reminders, and files in the card editor.
+
+Drag a column's right edge to resize it. Use its menu for a pixel width, or Auto widths to reset the project. Settings → Themes has three OLED Black options.
+
+See [the feature guide](FEATURES.md) for reminders, attachment safety, portable files, and saved views.
 
 ## 🧹 Repair or remove
 

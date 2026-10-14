@@ -128,10 +128,20 @@ THEMES = {
     },
 }
 
+# 🌑 OLED variants keep the board and card surfaces truly black.
+for _key, _label, _accent in (("oled_blue", "OLED Black · Blue", "#409CFF"),
+                              ("oled_mint", "OLED Black · Mint", "#5DE4B4"),
+                              ("oled_purple", "OLED Black · Purple", "#C4A1FF")):
+    THEMES[_key] = {**THEMES["macos_dark"], "label": _label,
+        "bg": "#000000", "surface": "#000000", "surface_alt": "#000000",
+        "border": "#303030", "border_strong": "#5A5A5A", "text": "#F5F5F5",
+        "text_muted": "#C0C0C0", "text_faint": "#A8A8A8", "accent": _accent,
+        "accent_hover": _accent, "accent_pressed": _accent, "shadow_alpha": 0}
+
 THEME_ORDER = [
     "macos_light", "macos_dark", "ios_light", "ios_dark", "graphite",
     "midnight_blue", "sandstone", "forest", "lavender", "high_contrast",
-    "seafoam", "carbon",
+    "seafoam", "carbon", "oled_blue", "oled_mint", "oled_purple",
 ]
 
 DEFAULT_THEME = "macos_light"
@@ -158,7 +168,16 @@ def build_stylesheet(theme_id: str, focus_outlines: bool = True, larger_click_ta
     # are static module-level data, so a cached string for a given
     # (theme_id, focus_outlines, larger_click_targets) triple never goes
     # stale.
-    return _build_stylesheet_cached(theme_id, focus_outlines, larger_click_targets)
+    sheet = _build_stylesheet_cached(theme_id, focus_outlines, larger_click_targets)
+    t = theme_colors(theme_id)
+    sheet += f"""
+QTableView, QListWidget {{ background-color: {t['surface']}; color: {t['text']}; gridline-color: {t['border']}; selection-background-color: {t['accent']}; selection-color: #000000; }}
+QHeaderView::section {{ background-color: {t['surface_alt']}; color: {t['text']}; border: 1px solid {t['border']}; padding: 7px; }}
+#CardDetails {{ background: transparent; color: #3A3A3E; font-size: 11px; }}
+"""
+    if theme_id.startswith('oled_'):
+        sheet += "\n#CardTitle, #CardDesc, #CardDetails, #CardNumber { color: #F5F5F5; }\n#CardTypeBadge { background: #151515; color: #F5F5F5; }\n"
+    return sheet
 
 
 @lru_cache(maxsize=None)

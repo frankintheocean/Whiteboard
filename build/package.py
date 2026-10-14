@@ -6,10 +6,10 @@ import subprocess
 import shutil
 import zipfile
 
-from build_utils import use_utf8_console
+from build_utils import use_utf8_console, app_version
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = 'WhiteBoard-1.0.0'
+NAME = 'WhiteBoard-' + app_version()
 
 
 def tracked_sources():
@@ -38,7 +38,7 @@ def main():
     archive = output / f'{NAME}-{suffix}.zip'
     files = [(p, p.relative_to(ROOT)) for p in tracked_sources() if p.is_file()]
     if args.installer:
-        installer = ROOT / 'dist_installer' / 'WhiteBoard-1.0.0-x64.msi'
+        installer = ROOT / 'dist_installer' / f'WhiteBoard-{app_version()}-x64.msi'
         executable = ROOT / 'dist' / 'WhiteBoard' / 'WhiteBoard.exe'
         if not installer.is_file() or not executable.is_file():
             raise RuntimeError('The complete release needs a built Windows installer and app.')

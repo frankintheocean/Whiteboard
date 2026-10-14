@@ -18,7 +18,8 @@ def tracked_sources():
         return [ROOT / name for name in result.stdout.decode().split('\0') if name]
     # An extracted release has no Git metadata. Include source folders only.
     excluded = {'__pycache__', '.pytest_cache', 'work', 'output'}
-    files = [p for p in ROOT.iterdir() if p.is_file()]
+    root_files = {'README.md', 'CHANGELOG.md', 'LICENSE', 'pytest.ini', 'requirements-dev.lock', '.gitignore'}
+    files = [p for p in ROOT.iterdir() if p.is_file() and p.name in root_files]
     for name in ('app', 'build', 'tests', 'docs', '.github'):
         for path in (ROOT / name).rglob('*'):
             if path.is_file() and not any(part in excluded for part in path.relative_to(ROOT).parts):

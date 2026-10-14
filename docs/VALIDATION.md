@@ -1,4 +1,4 @@
-# 🔬 Validation
+# 🔬 Read the checks and known limits
 
 ## ✅ Automated checks
 

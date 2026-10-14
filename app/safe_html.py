@@ -1,4 +1,4 @@
-"""🛡️ Keep rich text while blocking active content and local file reads."""
+"""🛡️ Filter unsafe content from rich notes."""
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlsplit

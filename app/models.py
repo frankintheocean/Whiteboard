@@ -4,6 +4,9 @@ from typing import List
 import uuid
 import time
 import math
+from card_tools import optional_time, clean_labels
+from attachments import clean_attachments
+from view_state import clean_view, clean_filters
 
 
 def new_id() -> str:
@@ -231,6 +234,11 @@ class Card:
     order: int = 0
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
+    due_at: float = None
+    reminder_at: float = None
+    reminder_sent_at: float = None
+    labels: List[str] = field(default_factory=list)
+    attachments: List[dict] = field(default_factory=list)
 
     def to_dict(self):
         return asdict(self)
@@ -249,6 +257,11 @@ class Card:
             order=_coerce_order(d.get("order", 0)),
             created_at=_timestamp(d.get("created_at")),
             updated_at=_timestamp(d.get("updated_at")),
+            due_at=optional_time(d.get("due_at")),
+            reminder_at=optional_time(d.get("reminder_at")) if optional_time(d.get("due_at")) is not None else None,
+            reminder_sent_at=optional_time(d.get("reminder_sent_at")),
+            labels=clean_labels(d.get("labels", [])),
+            attachments=clean_attachments(d.get("attachments", [])),
         )
 
 
@@ -277,6 +290,7 @@ class Column:
     # the app, not just switching projects and back within one session.
     sort_key: str = None
     sort_descending: bool = False
+    width: int = None
 
     def to_dict(self):
         return asdict(self)
@@ -290,6 +304,7 @@ class Column:
             order=_coerce_order(d.get("order", 0)),
             sort_key=_coerce_sort_key(d.get("sort_key")),
             sort_descending=d.get("sort_descending") is True,
+            width=max(220, min(900, d["width"])) if isinstance(d.get("width"), int) and not isinstance(d.get("width"), bool) else None,
         )
 
 
@@ -301,6 +316,11 @@ class Project:
     cards: List[Card] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
+    view_mode: str = "board"
+    view_filters: dict = field(default_factory=dict)
+    saved_views: List[dict] = field(default_factory=list)
+    list_sort: list = field(default_factory=lambda: [0, False])
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -308,6 +328,10 @@ class Project:
             "columns": [c.to_dict() for c in self.columns],
             "cards": [c.to_dict() for c in self.cards],
             "created_at": self.created_at,
+            "view_mode": self.view_mode,
+            "view_filters": dict(self.view_filters),
+            "saved_views": self.saved_views,
+            "list_sort": self.list_sort,
         }
 
     @staticmethod
@@ -317,6 +341,10 @@ class Project:
             id=_coerce_str_id(d.get("id")),
             name=_text(d.get("name"), "Untitled Project"),
             created_at=_timestamp(d.get("created_at")),
+            view_mode="list" if d.get("view_mode") == "list" else "board",
+            view_filters=clean_filters(d.get("view_filters")),
+            saved_views=[state for state in (clean_view(v) for v in d.get("saved_views", [])) if state is not None] if isinstance(d.get("saved_views"), list) else [],
+            list_sort=d["list_sort"] if isinstance(d.get("list_sort"), list) and len(d["list_sort"]) == 2 and isinstance(d["list_sort"][0], int) and 0 <= d["list_sort"][0] < 7 and isinstance(d["list_sort"][1], bool) else [0, False],
         )
         columns, cards = d.get("columns", []), d.get("cards", [])
         if not isinstance(columns, list) or not isinstance(cards, list):

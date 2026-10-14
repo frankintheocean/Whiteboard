@@ -2,6 +2,16 @@
 
 | File | Purpose |
 | --- | --- |
+| `app/card_tools.py` | 🔖 Read labels, dates, and searchable card text. |
+| `app/attachments.py` | 📎 Store verified file copies and portable exports. |
+| `app/card_details.py` | 🗓️ Edit labels, due times, reminders, and files. |
+| `app/card_table.py` | 📊 Sort and filter task rows without reordering the board. |
+| `app/quick_find.py` | 🔎 Find cards, projects, and actions from the keyboard. |
+| `app/reminders.py` | ⏰ Deliver saved reminder schedules once. |
+| `app/view_state.py` | 🎚️ Capture and restore named project views. |
+| `app/workspace_panel.py` | 🧮 Show project filters and board/list controls. |
+| `app/column_resize.py` | ↔️ Resize columns with a mouse handle. |
+| `tests/test_features.py` | 🧭 Check the new tools and their saved state. |
 | `app/main.py` | 🚪 Starts the app, icon, data lock, and error handling. |
 | `app/main_window.py` | 🪟 Shows projects, board actions, file tools, and undo/redo. |
 | `app/column_widget.py` | 🧱 Shows columns, sorting, filtering, and drop targets. |
@@ -16,7 +26,7 @@
 | `app/toast.py` | 🔔 Shows short status messages. |
 | `app/error_log.py` | 🩺 Keeps a bounded local error log. |
 | `app/app_meta.py` | 🏷️ Stores the app version and in-app change notes. |
-| `build/build_utils.py` | 🌐 Sets UTF-8 output for Windows build messages. |
+| `build/build_utils.py` | 🌐 Reads the app version and sets UTF-8 build output. |
 | `build/build.py` | 🔧 Builds the app and Windows MSI. |
 | `build/whiteboard.spec` | 🏗️ Lists the app files for PyInstaller. |
 | `build/installer.wxs` | 📦 Defines install, repair, and removal. |

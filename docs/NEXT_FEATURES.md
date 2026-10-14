@@ -1,4 +1,4 @@
-# 💡 Possible next features
+# 💡 Plan useful additions without duplicates
 
 These features are not included in this release and do not duplicate existing tools.
 

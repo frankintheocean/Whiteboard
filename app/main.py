@@ -1,4 +1,4 @@
-"""🚪 Start WhiteBoard and protect its local data."""
+"""🚪 Start WhiteBoard and lock its data folder."""
 import os
 import sys
 from PySide6.QtWidgets import QApplication, QMessageBox

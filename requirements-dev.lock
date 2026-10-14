@@ -1,3 +1,4 @@
+# 🧰 Keep test and build packages fixed.
 -r app/requirements.txt
 
 # 🧰 Locked test and build dependencies.

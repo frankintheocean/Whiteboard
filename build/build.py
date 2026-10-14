@@ -9,7 +9,7 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
-from build_utils import use_utf8_console
+from build_utils import use_utf8_console, app_version
 
 ROOT = Path(__file__).resolve().parents[1]
 NS = 'http://wixtoolset.org/schemas/v4/wxs'
@@ -55,16 +55,16 @@ def build_installer():
     license_text = (ROOT / 'LICENSE').read_text(encoding='utf-8')
     escaped = license_text.replace('\\', '\\\\').replace('{', '\\{').replace('}', '\\}').replace('\n', '\\par\n')
     (work / 'license.rtf').write_text('{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Segoe UI;}}\\f0\\fs18\n' + escaped + '}', encoding='utf-8')
-    output = ROOT / 'dist_installer' / 'WhiteBoard-1.0.0-x64.msi'
+    output = ROOT / 'dist_installer' / f'WhiteBoard-{app_version()}-x64.msi'
     output.parent.mkdir(exist_ok=True)
     run(wix, 'build', '-arch', 'x64', '-ext', 'WixToolset.UI.wixext/5.0.2',
-        '-d', f'ProjectRoot={ROOT}', ROOT / 'build' / 'installer.wxs', files_path, '-o', output)
+        '-d', f'ProjectRoot={ROOT}', '-d', f'AppVersion={app_version()}', ROOT / 'build' / 'installer.wxs', files_path, '-o', output)
     print(f'📦 Installer: {output}')
 
 
 def main():
     use_utf8_console()
-    parser = argparse.ArgumentParser(description='🏗️ Build WhiteBoard 1.0.0')
+    parser = argparse.ArgumentParser(description=f'🏗️ Build WhiteBoard {app_version()}')
     parser.add_argument('--installer', action='store_true', help='Build the Windows x64 MSI too')
     args = parser.parse_args()
     if args.installer and (sys.platform != 'win32' or platform.machine().lower() not in ('amd64', 'x86_64')):

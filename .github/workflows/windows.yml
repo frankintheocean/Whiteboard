@@ -74,4 +74,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" artifacts/* --title "🚀 WhiteBoard ${{ steps.version.outputs.version }}" --notes-file docs/RELEASE_NOTES.md --verify-tag
+        run: |
+          $whiteboardVersion = "${{ steps.version.outputs.version }}"
+          $whiteboardTag = "${{ github.ref_name }}"
+          if ($whiteboardTag -ne "v$whiteboardVersion") { throw "The tag must match the app version." }
+          gh release view $whiteboardTag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Output "This release is already published. Keeping its verified files."
+            exit 0
+          }
+          gh release create $whiteboardTag "artifacts/WhiteBoard-$whiteboardVersion-complete.zip#✉️ Complete project" "artifacts/WhiteBoard-$whiteboardVersion-x64.msi#⚙️ Windows installer" "artifacts/SHA256SUMS.txt#☑️ File checksums" --title "🎉 WhiteBoard $whiteboardVersion" --notes-file docs/RELEASE_NOTES.md --verify-tag

@@ -1,5 +1,19 @@
 # 🆕 Read the changes in version 1.0.0
 
+## 🚀 Version 1.1.0 — 14 October 2026
+
+- 🔎 Search card titles, notes, labels, types, priorities, and file names across projects.
+- ⏰ Set local due dates and reminder times, with missed reminders shown at launch.
+- 🏷️ Add several labels, including quoted names with commas.
+- 📎 Copy and verify attachments, save copies, and carry files in project exports.
+- 🧭 Open commands, projects, and cards with Ctrl+K.
+- 📋 Switch between board and list modes without changing stored card order.
+- 🎚️ Save and restore filters, list sorting, column sorting, and widths.
+- ↔️ Resize columns by dragging or choosing a pixel width.
+- 🌑 Add three OLED Black variants with readable text and black card surfaces.
+- 🧪 Extend tests for dates, files, reminders, views, resizing, and old workflows.
+- 🆔 Read the release version from one app field for builds and packages.
+
 ## 🥇 Version 1.0.0 — 14 October 2026
 
 This release uses version 1.0.0 and keeps existing project data compatible.

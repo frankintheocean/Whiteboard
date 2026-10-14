@@ -1,4 +1,4 @@
-# 🎉 WhiteBoard 1.0.0
+# 🎉 See what this release includes
 
 The task board keeps its existing workflows and improves project menus, scrolling, fonts, keyboard access, and save safety.
 

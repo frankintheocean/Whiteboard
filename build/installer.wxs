@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 📦 Add, restore, or remove the app without deleting projects. -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="WhiteBoard" Manufacturer="WhiteBoard" Version="1.0.0"
+  <Package Name="WhiteBoard" Manufacturer="WhiteBoard" Version="$(var.AppVersion)"
            UpgradeCode="82A67247-4475-4A72-94EA-9D0C81560858" Scope="perMachine" InstallerVersion="500">
-    <MajorUpgrade DowngradeErrorMessage="A newer WhiteBoard version is already installed." />
+    <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A newer WhiteBoard version is already installed." />
     <MediaTemplate EmbedCab="yes" />
     <Launch Condition="VersionNT64" Message="WhiteBoard needs 64-bit Windows 10 or 11." />
     <StandardDirectory Id="ProgramFiles64Folder">

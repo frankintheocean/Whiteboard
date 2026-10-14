@@ -1,4 +1,4 @@
-"""✅ Test the real MSI: install, start, repair, and uninstall."""
+"""✅ Check install, repair, and removal."""
 import hashlib
 import os
 from pathlib import Path

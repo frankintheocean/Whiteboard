@@ -1,4 +1,4 @@
-"""🔧 Build WhiteBoard and its Windows installer without batch files."""
+"""🔧 Make the app and Windows installer."""
 import argparse
 import hashlib
 import os

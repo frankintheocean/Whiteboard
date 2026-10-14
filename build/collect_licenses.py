@@ -1,4 +1,4 @@
-"""⚖️ Include the licenses shipped with the installed build packages."""
+"""📜 Collect notices from build packages."""
 import importlib.metadata
 from pathlib import Path
 import shutil

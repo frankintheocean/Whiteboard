@@ -27,6 +27,12 @@ import styles
 import app_meta
 import error_log
 from file_io import atomic_write_json
+from workspace_panel import WorkspacePanel
+from quick_find import QuickFindDialog, FindEntry
+from card_tools import search_text, apply_card_details, due_text
+from reminders import ReminderService
+from attachments import MAX_PROJECT_BYTES, project_file_bytes
+from view_state import remap_view_columns
 
 # Layout metrics used for the "window follows content" sizing behavior.
 BOARD_MARGIN = 16       # matches board_layout contents margins (left+right identical)
@@ -344,6 +350,73 @@ class MainWindow(QMainWindow):
         escape_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         escape_shortcut.setContext(Qt.WindowShortcut)
         escape_shortcut.activated.connect(self._clear_selection)
+        for key, callback in (("Ctrl+F", self._open_search), ("Ctrl+K", self._open_palette)):
+            shortcut = QShortcut(QKeySequence(key), self)
+            shortcut.activated.connect(callback)
+        self.reminders = ReminderService(self)
+
+
+    def _open_search(self):
+        self._find(False)
+
+    def _open_palette(self):
+        self._find(True)
+
+    def _find(self, palette):
+        entries = []
+        if palette:
+            actions = [("New card", "Add a card to this project", self._on_new_card_default),
+                       ("New project", "Create a project", self._on_new_project),
+                       ("Settings", "Change fonts and themes", self._on_open_settings),
+                       ("Open project file", "Open a saved project", self._on_open_file),
+                       ("Import project", "Import a separate copy", self._on_import_file),
+                       ("Save As", "Export a project with its files", self._on_save_file),
+                       ("Quick Save", "Update the saved project file", self._on_quick_save_file),
+                       ("Undo", "Undo a board change", self._on_undo_shortcut),
+                       ("Redo", "Redo a board change", self._on_redo_shortcut),
+                       ("Switch board or list", "Change the project view", self._toggle_view),
+                       ("Save current view", "Remember these filters and widths", self.workspace.save_view),
+                       ("Clear filters", "Show all cards in this project", self.workspace.clear_filters),
+                       ("Auto column widths", "Reset manual widths", self.workspace.reset_widths)]
+            for title, detail, callback in actions:
+                entries.append(FindEntry(title, detail, (title + ' ' + detail).casefold(), callback, 'command'))
+        for project in sorted(self.storage.projects, key=lambda p: p.name.casefold()):
+            if palette:
+                entries.append(FindEntry(project.name, 'Open project', project.name.casefold(), lambda pid=project.id: self._activate_project(pid), 'project'))
+            columns = {c.id: c.name for c in project.columns}
+            for card in project.cards:
+                entries.append(FindEntry(card.title, project.name + ' · ' + columns.get(card.column_id, ''), search_text(project, card),
+                    lambda pid=project.id, cid=card.id: self._open_found_card(pid, cid)))
+        dialog = QuickFindDialog(entries, self, palette)
+        if dialog.exec() and dialog.selected_entry:
+            dialog.selected_entry.callback()
+
+    def _activate_project(self, project_id):
+        if self.storage.get_project(project_id) is not None:
+            self.storage.active_project_id = project_id
+            self._refresh_project_selector()
+            self._load_active_project()
+            self._save()
+
+    def _open_found_card(self, project_id, card_id):
+        self._activate_project(project_id)
+        self._on_edit_card(card_id)
+
+    def _toggle_view(self):
+        self.workspace.mode.setCurrentIndex(1 - self.workspace.mode.currentIndex())
+
+    def _attachment_budget(self, exclude_card=None):
+        project = self.active_project
+        used = project_file_bytes(project, exclude_card) if project else 0
+        return max(0, MAX_PROJECT_BYTES - used)
+
+    def _on_column_width_changed(self, column_id, width):
+        if self.active_project:
+            for column in self.active_project.columns:
+                if column.id == column_id:
+                    column.width = width
+            self._apply_column_stretch_width()
+            self._save(self.active_project.id)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -502,6 +575,9 @@ class MainWindow(QMainWindow):
             if confirm != QMessageBox.Yes:
                 event.ignore()
                 return
+        reminders = getattr(self, "reminders", None)
+        if reminders is not None:
+            reminders.stop()
         toast_host = getattr(self, "_toast_host", None)
         if toast_host is not None:
             toast_host.dismiss_all()
@@ -630,22 +706,9 @@ class MainWindow(QMainWindow):
 
     # ---------------------------------------------------------- selection
     def _ordered_visible_card_ids(self):
-        """Every card id currently on the board, in column-then-order
-        sequence, used as the traversal order for Shift range-select --
-        matches the left-to-right, top-to-bottom order the board actually
-        renders in, so a Shift-click range visually matches the cards
-        between the anchor and the click."""
-        project = self.active_project
-        if project is None:
-            return []
-        ids = []
-        for column in sorted(project.columns, key=lambda c: c.order):
-            cards = sorted(
-                [c for c in project.cards if c.column_id == column.id],
-                key=lambda c: c.order,
-            )
-            ids.extend(c.id for c in cards)
-        return ids
+        return [card.id for widget in self._column_widgets.values()
+                for card in widget._sorted_for_display([c for c in widget._all_cards
+                    if not widget._type_filter or c.card_type == widget._type_filter])]
 
     def _on_card_select_requested(self, card_id: str, shift: bool, ctrl: bool):
         project = self.active_project
@@ -708,6 +771,7 @@ class MainWindow(QMainWindow):
         for cw in self._column_widgets.values():
             cw.set_selected_ids(self._selected_card_ids)
         self._update_selection_bar()
+        self.workspace.sync_selection()
 
     def _clear_selection(self):
         if not self._selected_card_ids:
@@ -882,18 +946,11 @@ class MainWindow(QMainWindow):
                 for c in project.cards:
                     if c.column_id == column_id and c.order > original.order:
                         c.order += 1
-                new_card = Card(
-                    id=new_id(),
-                    title=original.title,
-                    description=original.description,
-                    description_is_html=original.description_is_html,
-                    card_type=original.card_type,
-                    priority=original.priority,
-                    column_id=original.column_id,
-                    order=original.order + 1,
-                    created_at=now,
-                    updated_at=now,
-                )
+                new_card = copy.deepcopy(original)
+                new_card.id = new_id()
+                new_card.order = original.order + 1
+                new_card.created_at = now
+                new_card.updated_at = now
                 project.cards.append(new_card)
                 new_ids.add(new_card.id)
         self._save(project.id)
@@ -1219,7 +1276,8 @@ class MainWindow(QMainWindow):
         self.board_layout.addStretch()
 
         self.scroll_area.setWidget(self.board_canvas)
-        root.addWidget(self.scroll_area, 1)
+        self.workspace = WorkspacePanel(self, self.scroll_area)
+        root.addWidget(self.workspace, 1)
         self._save_status_label = QLabel("💾 Saved locally · Works offline")
         self._save_status_label.setTextFormat(Qt.PlainText)
         self._save_status_label.setAccessibleName("Save status")
@@ -1352,6 +1410,8 @@ class MainWindow(QMainWindow):
         self._last_applied_theme_key = cache_key
         from card_widget import FeatureCardWidget
         FeatureCardWidget.focus_outlines = focus_outlines
+        FeatureCardWidget.oled_mode = theme_id.startswith("oled_")
+        FeatureCardWidget.focus_color = styles.theme_colors(theme_id)["accent"]
         toast_host = getattr(self, "_toast_host", None)
         if toast_host is not None:
             toast_host.set_theme(theme_id)
@@ -1387,6 +1447,11 @@ class MainWindow(QMainWindow):
             sheet += f'\nQWidget, #AppTitle, #ColumnHeader, #ChangelogVersion, #ColumnEmptyStateIcon {{ font-family: "{font_family}", "Segoe UI", sans-serif; }}'
             sheet += f'\n#CardDesc {{ font-size: {round(reader_size * ui_scale_factor)}pt; }}'
             app.setStyleSheet(sheet)
+        for column in getattr(self, "_column_widgets", {}).values():
+            column._apply_accent_color()
+            for card_widget in column._card_widgets.values():
+                card_widget._apply_selection_frame()
+                card_widget._apply_shadow()
         # Re-derive the top bar's scaling baseline against the stylesheet
         # that was just applied (large_text/ui_scale may have just changed
         # what "100%" means for every control here) and immediately re-fit
@@ -1395,6 +1460,9 @@ class MainWindow(QMainWindow):
         # first call, from __init__, runs before _build_ui).
         self._topbar_capture_base_sizes()
         self._apply_topbar_scale()
+        workspace = getattr(self, "workspace", None)
+        if workspace is not None:
+            workspace.fit_toolbar()
 
     # ------------------------------------------------------------- project
     def _ensure_project_exists(self):
@@ -1556,9 +1624,9 @@ class MainWindow(QMainWindow):
         actions fail the same, visible way rather than one of them
         silently losing the write."""
         try:
-            atomic_write_json(path, project.to_dict())
+            atomic_write_json(path, self.storage.attachments.export_project(project))
             return True
-        except OSError as e:
+        except (OSError, ValueError) as e:
             error_log.log_error("Save As / Quick Save to external file", e)
             self._toast_host.show_toast(
                 f"Couldn't save the project file: {e}", kind="error", duration_ms=4500,
@@ -1615,9 +1683,11 @@ class MainWindow(QMainWindow):
         if not isinstance(data, dict) or "columns" not in data or "cards" not in data:
             raise ValueError("That file doesn't look like a WhiteBoard project.")
         try:
-            return Project.from_dict(data)
-        except (TypeError, AttributeError, ValueError):
-            raise ValueError("That file doesn't look like a WhiteBoard project.")
+            project = Project.from_dict(data)
+            self.storage.attachments.import_project(project, data.get("attachment_files"))
+            return project
+        except (TypeError, AttributeError, ValueError, OSError) as error:
+            raise ValueError(f"Could not open the project: {error}")
 
     def _on_open_file(self):
         """Open a project file and switch to it. If it matches a project
@@ -1671,6 +1741,7 @@ class MainWindow(QMainWindow):
         for card in project.cards:
             card.id = new_id()
             card.column_id = column_id_map.get(card.column_id, card.column_id)
+        remap_view_columns(project, column_id_map)
         existing_names = {p.name for p in self.storage.projects}
         if project.name in existing_names:
             base_name = project.name
@@ -1733,6 +1804,12 @@ class MainWindow(QMainWindow):
                     lines.append(f"- **{type_tag} {card.title}**")
                 else:
                     lines.append(f"- {type_tag} {card.title}")
+                if card.labels:
+                    lines.append('    Labels: ' + ', '.join(card.labels))
+                if card.due_at is not None:
+                    lines.append('    Due: ' + due_text(card.due_at))
+                if card.attachments:
+                    lines.append('    Files: ' + ', '.join(a['name'] for a in card.attachments))
                 desc = self._description_to_plain(card)
                 if desc:
                     for desc_line in desc.splitlines():
@@ -2021,6 +2098,7 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------- board
     def _load_active_project(self):
         project = self.active_project
+        self.workspace.set_project(project)
         # Clear existing column widgets
         for cw in list(self._column_widgets.values()):
             self.board_layout.removeWidget(cw)
@@ -2064,8 +2142,11 @@ class MainWindow(QMainWindow):
                 accent_index=accent_index,
                 initial_sort_key=saved_key, initial_sort_descending=saved_desc,
             )
+            if column.width is not None:
+                cw.set_column_width(column.width)
             cw.set_always_highlight_drop_zone(self.storage.get_setting("always_show_drop_zones", False))
             cw.sortStateChanged.connect(self._on_column_sort_state_changed)
+            cw.widthChanged.connect(self._on_column_width_changed)
             cw.cardDropped.connect(self._on_card_dropped)
             cw.addCardRequested.connect(self._on_add_card)
             cw.quickAddRequested.connect(self._on_quick_add_card)
@@ -2147,11 +2228,12 @@ class MainWindow(QMainWindow):
             cw.update_custom_types(custom_types)
             cw.set_selected_ids(self._selected_card_ids)
             cards = sorted(
-                [c for c in project.cards if c.column_id == column_id],
+                [c for c in project.cards if c.column_id == column_id and self.workspace.matches(c)],
                 key=lambda c: c.order
             )
             cw.set_cards(cards, show_numbers=show_numbers)
         self._update_selection_bar()
+        self.workspace.refresh()
 
     # -------------------------------------------------------- window sizing
     def _ideal_window_width(self) -> int:
@@ -2274,19 +2356,12 @@ class MainWindow(QMainWindow):
 
         viewport_width = scroll_area.viewport().width()
         available = viewport_width - (BOARD_MARGIN * 2) - (BOARD_SPACING * (n - 1))
-        base_total = n * COLUMN_WIDTH
-
-        if available >= base_total:
-            target = min(COLUMN_MAX_WIDTH, available // n)
-            target = max(target, COLUMN_WIDTH)
-        else:
-            # Not enough room for every column at its comfortable width:
-            # shrink evenly rather than clip columns out of view.
-            target = max(COLUMN_MIN_WIDTH, available // n)
-            target = min(target, COLUMN_WIDTH)
-
+        fixed = {cw.column.id: cw.column.width for cw in columns if cw.column.width is not None}
+        auto_count = n - len(fixed)
+        remaining = available - sum(fixed.values())
+        target = max(COLUMN_MIN_WIDTH, min(COLUMN_MAX_WIDTH, remaining // auto_count)) if auto_count else COLUMN_WIDTH
         for cw in columns:
-            cw.set_column_width(target)
+            cw.set_column_width(fixed.get(cw.column.id, target))
 
     def _apply_topbar_scale(self):
         """Shrinks or grows every top-bar control's font together as the
@@ -2389,6 +2464,8 @@ class MainWindow(QMainWindow):
         dialog = CardDialog(
             self, heading="\u2795 Add Card", available_types=self._available_card_types(),
             type_usage_counts=self._card_type_usage_counts(),
+            attachment_store=self.storage.attachments, attachment_budget=self._attachment_budget(),
+            attachment_hashes={a["sha256"] for c in self.active_project.cards for a in c.attachments},
         )
         dialog.manageTypesRenameRequested.connect(self._on_manage_type_rename)
         dialog.manageTypesDeleteRequested.connect(self._on_manage_type_delete)
@@ -2412,6 +2489,7 @@ class MainWindow(QMainWindow):
                 column_id=column_id,
                 order=max_order + 1,
             )
+            apply_card_details(card, values)
             project.cards.append(card)
             self._save(project.id)
             self._record_undo_step(project, before)
@@ -2456,6 +2534,9 @@ class MainWindow(QMainWindow):
             card_type=card.card_type, priority=card.priority, heading="\u270F\uFE0F Edit Card",
             available_types=self._available_card_types(),
             type_usage_counts=self._card_type_usage_counts(),
+            labels=card.labels, due_at=card.due_at, reminder_at=card.reminder_at, attachments=card.attachments,
+            attachment_store=self.storage.attachments, attachment_budget=self._attachment_budget(card.id),
+            attachment_hashes={a["sha256"] for c in project.cards if c.id != card.id for a in c.attachments},
         )
         dialog.manageTypesRenameRequested.connect(self._on_manage_type_rename)
         dialog.manageTypesDeleteRequested.connect(self._on_manage_type_delete)
@@ -2471,6 +2552,7 @@ class MainWindow(QMainWindow):
             card.description_is_html = values["description_is_html"]
             card.card_type = values["card_type"]
             card.priority = values.get("priority", "")
+            apply_card_details(card, values)
             card.updated_at = time.time()
             self._save(project.id)
             self._record_undo_step(project, before)
@@ -2511,18 +2593,10 @@ class MainWindow(QMainWindow):
             return
         before = self._snapshot_project_state(project)
         now = time.time()
-        new_card = Card(
-            id=new_id(),
-            title=card.title,
-            description=card.description,
-            description_is_html=card.description_is_html,
-            card_type=card.card_type,
-            priority=card.priority,
-            column_id=card.column_id,
-            order=card.order,
-            created_at=now,
-            updated_at=now,
-        )
+        new_card = copy.deepcopy(card)
+        new_card.id = new_id()
+        new_card.created_at = now
+        new_card.updated_at = now
         # Shift every card at or after the original's order up by one, so
         # the duplicate lands immediately after it instead of at the end
         # of the column.

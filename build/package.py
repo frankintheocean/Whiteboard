@@ -1,4 +1,4 @@
-"""🎁 Make a ZIP with one root folder and verified release files."""
+"""🎁 Bundle source and release files in one ZIP."""
 import argparse
 import hashlib
 from pathlib import Path

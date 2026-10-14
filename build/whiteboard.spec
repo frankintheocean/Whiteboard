@@ -1,3 +1,4 @@
+# 🏗️ List app files for the standalone build.
 # 🏗️ Build the app folder. Run from the project root.
 from pathlib import Path
 

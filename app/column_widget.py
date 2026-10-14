@@ -2,7 +2,7 @@
 from smooth_scroll import SmoothVScrollArea
 from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QSizePolicy, QMenu,
-    QToolButton, QScrollArea, QComboBox, QLineEdit
+    QToolButton, QScrollArea, QComboBox, QLineEdit, QInputDialog
 )
 from PySide6.QtCore import QTimer, Qt, Signal, QMimeData, QPoint
 from PySide6.QtGui import QDrag
@@ -10,6 +10,8 @@ from PySide6.QtGui import QDrag
 from card_widget import FeatureCardWidget, CARD_MIME_TYPE, CARD_GROUP_MIME_TYPE
 from models import Column, column_accent_color, CARD_TYPES, PRIORITY_LEVELS
 import styles
+from column_resize import ColumnResizeHandle
+from card_tools import plain_tooltip
 
 # Sort options for each column's own "Sort by" combo box (view-only, same
 # rendering-time-only contract as the type filter below: never touches
@@ -103,6 +105,7 @@ class ColumnDropIndicatorV(QFrame):
 
 
 class ColumnWidget(QFrame):
+    widthChanged = Signal(str, object)
     cardDropped = Signal(str, str, int)   # card_id, column_id, index
     addCardRequested = Signal(str)        # column_id
     quickAddRequested = Signal(str, str)  # column_id, title
@@ -183,6 +186,11 @@ class ColumnWidget(QFrame):
         self._empty_state_widget = None  # placeholder shown when there are no visible cards
         self._apply_accent_color()
 
+        self._resize_handle = ColumnResizeHandle(self)
+        self._resize_handle.preview.connect(self.set_column_width)
+        self._resize_handle.committed.connect(lambda width: self.widthChanged.emit(self.column.id, width))
+        self._resize_handle.setGeometry(self.width() - 7, 0, 7, self.height())
+
     def set_reduced_motion(self, enabled: bool):
         self._scroll_area.set_reduced_motion(enabled)
 
@@ -240,7 +248,7 @@ class ColumnWidget(QFrame):
         self.header_label.setTextFormat(Qt.PlainText)
         self.header_label.setObjectName("ColumnHeader")
         self.header_label.setWordWrap(True)
-        self.header_label.setToolTip(self.column.name)
+        self.header_label.setToolTip(plain_tooltip(self.column.name))
         self.header_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.header_label.setCursor(Qt.PointingHandCursor)
         self.header_label.mouseDoubleClickEvent = lambda e: self.renameRequested.emit(self.column.id)
@@ -287,6 +295,8 @@ class ColumnWidget(QFrame):
         rename_action.triggered.connect(lambda: self.renameRequested.emit(self.column.id))
         delete_action = col_menu.addAction("\U0001F5D1\uFE0F Delete Column")
         delete_action.triggered.connect(lambda: self.deleteRequested.emit(self.column.id))
+        col_menu.addAction("↔️ Set column width…", self._choose_width)
+        col_menu.addAction("Auto width", lambda: self.widthChanged.emit(self.column.id, None))
         self.menu_btn.setMenu(col_menu)
         actions_row.addWidget(self.menu_btn)
 
@@ -445,6 +455,18 @@ class ColumnWidget(QFrame):
             return
         self.quick_add_edit.clear()
         self.quickAddRequested.emit(self.column.id, title)
+
+    def _choose_width(self):
+        width, ok = QInputDialog.getInt(self, "↔️ Column width", "Width in pixels:", self.width(), 220, 900)
+        if ok:
+            self.widthChanged.emit(self.column.id, width)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        handle = getattr(self, "_resize_handle", None)
+        if handle is not None:
+            handle.setGeometry(self.width() - 7, 0, 7, self.height())
+            handle.raise_()
 
     def _handle_press(self, event):
         if event.button() == Qt.LeftButton:

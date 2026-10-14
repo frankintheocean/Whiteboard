@@ -1,4 +1,4 @@
-"""🔍 Check malformed content without losing valid cards."""
+"""🔍 Check malformed data and unsafe notes."""
 import math
 import pytest
 from models import Project, Card, Column

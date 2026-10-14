@@ -1,0 +1,13 @@
+name: 🌱 Suggest a feature
+description: Explain how WhiteBoard could help you better.
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: 🎯 What do you need to do?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 💭 How should it work?

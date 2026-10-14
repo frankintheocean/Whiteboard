@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 📦 Install, repair, or remove WhiteBoard. User data is never removed. -->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="WhiteBoard" Manufacturer="WhiteBoard" Version="1.0.0"
+           UpgradeCode="82A67247-4475-4A72-94EA-9D0C81560858" Scope="perMachine" InstallerVersion="500">
+    <MajorUpgrade DowngradeErrorMessage="A newer WhiteBoard version is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+    <Launch Condition="VersionNT64" Message="WhiteBoard needs 64-bit Windows 10 or 11." />
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="WhiteBoard" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="WhiteBoard">
+        <Component Id="StartMenuShortcut" Guid="BD4B90D7-4F61-4718-9C90-7AE270134461">
+          <Shortcut Id="StartMenu" Name="WhiteBoard" Target="[INSTALLFOLDER]WhiteBoard.exe" WorkingDirectory="INSTALLFOLDER" Icon="WhiteBoardIcon" />
+          <RemoveFolder Id="RemoveMenuFolder" On="uninstall" />
+          <RegistryValue Root="HKLM" Key="Software\WhiteBoard" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+    <Icon Id="WhiteBoardIcon" SourceFile="$(var.ProjectRoot)\build\assets\whiteboard.ico" />
+    <Property Id="ARPPRODUCTICON" Value="WhiteBoardIcon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/frankintheocean/Whiteboard" />
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectRoot)\build\work\license.rtf" />
+    <Feature Id="MainFeature" Title="WhiteBoard" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+  </Package>
+</Wix>

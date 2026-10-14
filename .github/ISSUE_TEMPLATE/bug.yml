@@ -1,0 +1,24 @@
+name: 🐞 Report a bug
+description: Help us repeat and fix a WhiteBoard problem.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🚨 What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 👣 Steps to repeat it
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 🏷️ App and Windows versions
+  - type: textarea
+    id: logs
+    attributes:
+      label: 🧾 Relevant errors
+      description: Remove private project text and personal paths before sharing.

@@ -1,4 +1,4 @@
-"""🏷️ Keep the app version and change notes."""
+"""🏷️ Show the version and change notes."""
 
 APP_VERSION = "1.0.0"
 

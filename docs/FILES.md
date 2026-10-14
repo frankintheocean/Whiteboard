@@ -1,4 +1,4 @@
-# 🗺️ Source file guide
+# 🗺️ Find the purpose of each source file
 
 | File | Purpose |
 | --- | --- |

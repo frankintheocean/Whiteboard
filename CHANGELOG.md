@@ -1,4 +1,4 @@
-# 🆕 Changes
+# 🆕 Read the changes in version 1.0.0
 
 ## 🥇 Version 1.0.0 — 14 October 2026
 

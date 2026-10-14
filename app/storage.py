@@ -1,4 +1,4 @@
-"""🗃️ Save projects and settings in local JSON files."""
+"""🗃️ Keep projects and settings on disk."""
 import hashlib
 import json
 import os

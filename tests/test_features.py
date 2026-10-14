@@ -279,3 +279,16 @@ def test_tooltips_escape_user_markup_and_text_exports_keep_details(board, qtbot)
     p.cards = [Card('id', 'Task', column_id=p.columns[0].id, labels=['Client'], due_at=1900000000)]
     text = board._build_export_text(p, True)
     assert 'Labels: Client' in text and 'Due:' in text
+
+
+def test_due_filter_updates_board_and_list_when_time_passes(board, qtbot):
+    p = board.active_project
+    p.cards = [Card('id', 'Due soon', column_id=p.columns[0].id, due_at=1100)]
+    p.view_filters = {'due': 'overdue'}
+    with patch('workspace_panel.time.time', return_value=1000):
+        board.workspace.set_project(p); board._refresh_all_columns()
+        assert board.workspace.proxy.rowCount() == 0
+    with patch('workspace_panel.time.time', return_value=1200):
+        board.workspace.update_clock()
+        assert board.workspace.proxy.rowCount() == 1
+        assert sum(len(c._card_widgets) for c in board._column_widgets.values()) == 1

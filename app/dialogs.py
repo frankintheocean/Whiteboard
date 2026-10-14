@@ -13,6 +13,9 @@ import styles
 import app_meta
 import error_log
 from safe_html import safe_rich_text
+from card_details import CardDetails
+from card_tools import plain_tooltip
+from attachments import MAX_PROJECT_BYTES
 
 
 def _apply_pointer_cursor(button_box: QDialogButtonBox):
@@ -34,7 +37,7 @@ class FitPopupComboBox(QComboBox):
         view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setMaxVisibleItems(12)
         for i in range(self.count()):
-            self.setItemData(i, self.itemText(i), Qt.ToolTipRole)
+            self.setItemData(i, plain_tooltip(self.itemText(i)), Qt.ToolTipRole)
         # Measure after Qt has polished the popup and applied its font.
         super().showPopup()
         view.ensurePolished()
@@ -229,7 +232,7 @@ class CardDialog(QDialog):
 
     def __init__(self, parent=None, title="", description="", description_is_html=False,
                  card_type="Add", priority="", heading="Add Card", available_types=None,
-                 type_usage_counts=None):
+                 type_usage_counts=None, labels=None, due_at=None, reminder_at=None, attachments=None, attachment_store=None, attachment_budget=MAX_PROJECT_BYTES, attachment_hashes=None):
         super().__init__(parent)
         self.setWindowTitle(heading)
         self.setMinimumWidth(400)
@@ -238,7 +241,14 @@ class CardDialog(QDialog):
         self._type_usage_counts = type_usage_counts or {}
         self.newCardTypeCreated = None
 
-        layout = QVBoxLayout(self)
+        outer = QVBoxLayout(self)
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        scroll.setWidget(content)
+        outer.addWidget(scroll, 1)
         layout.setSpacing(10)
         layout.setContentsMargins(20, 20, 20, 20)
 
@@ -276,11 +286,14 @@ class CardDialog(QDialog):
         self.rich_editor = RichTextEditor(description, is_html=description_is_html)
         layout.addWidget(self.rich_editor)
 
+        self.details = CardDetails(labels, due_at, reminder_at, attachments, attachment_store, attachment_budget, self, attachment_hashes)
+        layout.addWidget(self.details)
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         _apply_pointer_cursor(buttons)
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        outer.addWidget(buttons)
+        self.resize(540, min(720, self.screen().availableGeometry().height() - 60))
 
         self.title_edit.setFocus()
 
@@ -372,6 +385,11 @@ class CardDialog(QDialog):
         if not self.title_edit.text().strip():
             self.title_edit.setStyleSheet("border: 1px solid #E0393E;")
             return
+        try:
+            self.details.prepare()
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(self, '⚠️ Could not save card details', str(error))
+            return
         self.accept()
 
     def get_values(self):
@@ -382,6 +400,7 @@ class CardDialog(QDialog):
             # selection, but fall back to the first real type just in case.
             selected_type = self._available_types[0] if self._available_types else "Add"
         return {
+            **self.details.get_values(),
             "title": self.title_edit.text().strip(),
             "description": self.rich_editor.to_html().strip() if is_rich else self.rich_editor.to_plain_text(),
             "description_is_html": is_rich,

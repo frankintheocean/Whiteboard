@@ -1,4 +1,4 @@
-"""🧬 Define and validate projects, columns, and cards."""
+"""🧬 Define project, column, and card data."""
 from dataclasses import dataclass, field, asdict
 from typing import List
 import uuid

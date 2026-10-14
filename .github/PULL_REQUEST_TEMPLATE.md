@@ -1,6 +1,6 @@
 ## 🔀 Change
 
-Explain what changed and why.
+Say what changed and why it helps.
 
 ## 🧪 Checks
 

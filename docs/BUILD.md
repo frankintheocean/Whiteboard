@@ -1,4 +1,4 @@
-# 🛠️ Build and package WhiteBoard
+# 🛠️ Build and package the Windows app
 
 Use a Windows 10/11 x64 machine, Python 3.12 x64, and the .NET 8 SDK. GitHub Actions uses Windows Server 2022 for automated build checks.
 

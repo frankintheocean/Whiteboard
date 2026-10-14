@@ -1,6 +1,9 @@
 # 🏗️ List app files for the standalone build.
 # 🏗️ Build the app folder. Run from the project root.
 from pathlib import Path
+import sys
+sys.path.insert(0, SPECPATH)
+from build_utils import windows_version_file
 
 root = Path(SPECPATH).parent
 app_path = root / 'app'
@@ -19,6 +22,6 @@ exe = EXE(
     debug=False, bootloader_ignore_signals=False, strip=False, upx=False,
     console=False, disable_windowed_traceback=False,
     icon=str(assets / 'whiteboard.ico'),
-    version=str(root / 'build' / 'version_info.txt') if __import__('sys').platform == 'win32' else None,
+    version=windows_version_file(root) if sys.platform == 'win32' else None,
 )
 coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name='WhiteBoard')

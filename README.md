@@ -1,4 +1,4 @@
-# 📝 WhiteBoard 1.1.0
+# 📝 WhiteBoard
 
 WhiteBoard is a task board for Windows 10/11 x64. Create a project, add task cards, and move them through status columns. Keep notes, set priorities, and see what needs work next.
 

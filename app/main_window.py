@@ -1,4 +1,4 @@
-"""🪟 Show projects, board actions, and file tools."""
+"""🪟 Show projects and board actions."""
 from smooth_scroll import SmoothScrollArea
 import copy
 import json

@@ -1,4 +1,4 @@
-"""🧪 Isolate tests from real user data."""
+"""🧪 Keep tests away from user data."""
 import os
 import sys
 from pathlib import Path

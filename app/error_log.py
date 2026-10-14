@@ -1,4 +1,4 @@
-"""🩺 Keep a small local error log."""
+"""🩺 Keep recent app errors for review."""
 import os
 import time
 import traceback

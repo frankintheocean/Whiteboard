@@ -1,4 +1,4 @@
-"""💾 Write complete JSON files before replacing the saved copy."""
+"""💾 Write complete JSON before replacing files."""
 import json
 import os
 import tempfile

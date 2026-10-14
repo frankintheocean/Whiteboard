@@ -1,4 +1,4 @@
-"""🧱 Show one status column and its cards."""
+"""🧱 Arrange cards inside status columns."""
 from smooth_scroll import SmoothVScrollArea
 from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QSizePolicy, QMenu,

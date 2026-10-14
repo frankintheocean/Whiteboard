@@ -1,4 +1,4 @@
-"""🌀 Shared wheel scrolling for the board and its columns."""
+"""🌀 Control wheel scrolling and animation."""
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QEvent
 from PySide6.QtWidgets import QScrollArea, QApplication, QWidget
 

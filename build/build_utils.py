@@ -1,4 +1,4 @@
-"""🌐 Keep build messages readable on Windows consoles and CI."""
+"""🌐 Print readable Windows build messages."""
 import sys
 
 

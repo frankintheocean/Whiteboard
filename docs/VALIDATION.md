@@ -2,7 +2,7 @@
 
 ## ✅ Automated checks
 
-The local suite passes 66 tests on Linux with Qt 6.11.2 and Python 3.12. The source app and a local frozen build both pass startup checks. Windows results are recorded separately by the release workflow.
+The local suite passes 67 tests on Linux with Qt 6.11.2 and Python 3.12. The source app and a local frozen build both pass startup checks. Windows results are recorded separately by the release workflow.
 
 The test suite checks local save/load, old-file migration, malformed data, duplicate IDs, missing column links, finite timestamps, Unicode, isolated settings, failed writes, delayed deletion, unsafe HTML/URLs, and a 10,000-card save/load case.
 
@@ -12,7 +12,7 @@ The app works without a network connection. All app state stays in local files. 
 
 ## 🧰 New-feature checks
 
-Tests cover UTC/local date round trips, overdue filters, one-time reminders, rescheduling, label cleanup, quoted labels, copied attachments, missing originals, damage detection, blocked paths and executable names, file size limits, portable imports, shared-content exports, global search over 10,000 entries, command filtering, board/list selection, list scroll retention, named views, imported view IDs, manual widths, drag clamping, OLED variants, and metadata-preserving duplication and undo.
+Tests cover UTC/local date round trips, overdue filters and live date-boundary updates, one-time reminders, rescheduling, label cleanup, quoted labels, copied attachments, missing originals, damage detection, blocked paths and executable names, file size limits, portable imports, shared-content exports, global search over 10,000 entries, command filtering, board/list selection, list scroll retention, named views, imported view IDs, manual widths, drag clamping, OLED variants, and metadata-preserving duplication and undo.
 
 ## 🪟 Windows release gate
 

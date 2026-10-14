@@ -1,4 +1,4 @@
-# 🖐️ Use WhiteBoard
+# 🖐️ Learn the board controls
 
 ## 🏁 Start a project
 

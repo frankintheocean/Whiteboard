@@ -9,6 +9,8 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
+from build_utils import use_utf8_console
+
 ROOT = Path(__file__).resolve().parents[1]
 NS = 'http://wixtoolset.org/schemas/v4/wxs'
 
@@ -61,6 +63,7 @@ def build_installer():
 
 
 def main():
+    use_utf8_console()
     parser = argparse.ArgumentParser(description='🏗️ Build WhiteBoard 1.0.0')
     parser.add_argument('--installer', action='store_true', help='Build the Windows x64 MSI too')
     args = parser.parse_args()

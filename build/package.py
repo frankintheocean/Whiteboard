@@ -6,6 +6,8 @@ import subprocess
 import shutil
 import zipfile
 
+from build_utils import use_utf8_console
+
 ROOT = Path(__file__).resolve().parents[1]
 NAME = 'WhiteBoard-1.0.0'
 
@@ -25,12 +27,14 @@ def tracked_sources():
 
 
 def main():
+    use_utf8_console()
     parser = argparse.ArgumentParser(description='🎁 Package the full WhiteBoard release')
     parser.add_argument('--installer', action='store_true', help='Require and include the Windows MSI and app')
     args = parser.parse_args()
     output = ROOT / 'artifacts'
     output.mkdir(exist_ok=True)
-    archive = output / f'{NAME}-source.zip'
+    suffix = 'complete' if args.installer else 'source'
+    archive = output / f'{NAME}-{suffix}.zip'
     files = [(p, p.relative_to(ROOT)) for p in tracked_sources() if p.is_file()]
     if args.installer:
         installer = ROOT / 'dist_installer' / 'WhiteBoard-1.0.0-x64.msi'

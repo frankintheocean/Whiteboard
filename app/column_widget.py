@@ -448,13 +448,15 @@ class ColumnWidget(QFrame):
 
     def _handle_press(self, event):
         if event.button() == Qt.LeftButton:
+            self._column_drag_active = False
             self._drag_start_pos = event.position().toPoint()
 
     def _handle_move(self, event):
-        if not (event.buttons() & Qt.LeftButton):
+        if getattr(self, "_column_drag_active", False) or not (event.buttons() & Qt.LeftButton):
             return
         if (event.position().toPoint() - self._drag_start_pos).manhattanLength() < 12:
             return
+        self._column_drag_active = True
         drag = QDrag(self)
         mime = QMimeData()
         mime.setData(COLUMN_MIME_TYPE, self.column.id.encode("utf-8"))
@@ -472,6 +474,12 @@ class ColumnWidget(QFrame):
         # actually be visible once an accent color was added.
         self._apply_accent_color(dragging=True)
         drag.exec(Qt.MoveAction)
+        # A column reorder may replace this widget inside the drag event loop.
+        try:
+            self.isVisible()
+        except RuntimeError:
+            return
+        drag.deleteLater()
         self._apply_accent_color(dragging=False)
 
     # ---------------------------------------------------------- rendering

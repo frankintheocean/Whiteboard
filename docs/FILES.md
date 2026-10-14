@@ -16,6 +16,7 @@
 | `app/toast.py` | 🔔 Shows short status messages. |
 | `app/error_log.py` | 🩺 Keeps a bounded local error log. |
 | `app/app_meta.py` | 🏷️ Stores the app version and in-app change notes. |
+| `build/build_utils.py` | 🌐 Sets UTF-8 output for Windows build messages. |
 | `build/build.py` | 🔧 Builds the app and Windows MSI. |
 | `build/whiteboard.spec` | 🏗️ Lists the app files for PyInstaller. |
 | `build/installer.wxs` | 📦 Defines install, repair, and removal. |

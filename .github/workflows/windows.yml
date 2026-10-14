@@ -16,6 +16,7 @@ jobs:
       contents: write
     env:
       QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: '1'
     steps:
       - name: 📥 Get source
         uses: actions/checkout@v4

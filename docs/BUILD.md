@@ -56,7 +56,7 @@ Do not run this script on a machine with an existing WhiteBoard installation. Fo
 .venv\Scripts\python build\package.py --installer
 ```
 
-`artifacts/WhiteBoard-1.0.0-source.zip` includes source, resources, locks, docs, the built app, MSI, and third-party license files. `SHA256SUMS.txt` checks the release files. The ZIP contains its own file checksum list.
+`artifacts/WhiteBoard-1.0.0-complete.zip` includes source, resources, locks, docs, the built app, MSI, and third-party license files. `SHA256SUMS.txt` checks the release files. The ZIP contains its own file checksum list.
 
 Use `python build/package.py` for a source-only ZIP when no Windows installer has been built. It will not claim that an installer exists.
 

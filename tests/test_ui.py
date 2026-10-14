@@ -206,3 +206,21 @@ def test_short_columns_do_not_stretch_cards_and_headers_wrap(board, qtbot):
     assert col.header_label.textFormat() == Qt.PlainText
     assert widget.badge.toolButtonStyle() == Qt.ToolButtonTextOnly
     assert widget.badge.width() >= widget.badge.fontMetrics().horizontalAdvance(widget.badge.text())
+
+
+def test_column_drop_cleanup_survives_widget_replacement(qtbot):
+    import shiboken6
+    from unittest.mock import Mock
+    from column_widget import ColumnWidget
+    from models import Column
+    widget = ColumnWidget(Column('column', 'Column'))
+    widget.show(); qtbot.wait(10)
+    widget._drag_start_pos = QPoint(0, 0)
+    event = Mock()
+    event.buttons.return_value = Qt.LeftButton
+    event.position.return_value = QPointF(100, 100)
+    drag = Mock()
+    drag.exec.side_effect = lambda action: shiboken6.delete(widget)
+    with patch('column_widget.QDrag', return_value=drag):
+        widget._handle_move(event)
+    assert drag.exec.call_count == 1

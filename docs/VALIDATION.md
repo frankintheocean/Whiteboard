@@ -2,6 +2,8 @@
 
 ## ✅ Automated checks
 
+The local suite passes 36 tests on Linux with Qt 6.11.2 and Python 3.12. The source app and a local frozen build both pass startup checks. Windows results are recorded separately by the release workflow.
+
 The test suite checks local save/load, old-file migration, malformed data, duplicate IDs, missing column links, finite timestamps, Unicode, isolated settings, failed writes, delayed deletion, unsafe HTML/URLs, and a 10,000-card save/load case.
 
 Qt tests check project menus with 150 names, very long names, double-click scrolling, scroll retention after refresh, keyboard editing/selection, font-only note formatting, all 10 themes, resizing, card moves, undo/redo, and type changes.

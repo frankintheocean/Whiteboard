@@ -85,6 +85,7 @@ class FeatureCardWidget(QFrame):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
 
         self._drag_start_pos: QPoint = QPoint()
+        self._drag_active = False
         self._drag_pending = False  # guards against re-entrant mouseMoveEvent scheduling multiple drags
         # Set on mousePressEvent when a plain (no Shift/Ctrl) click lands
         # on a card that's already part of a multi-selection, and the
@@ -487,7 +488,7 @@ class FeatureCardWidget(QFrame):
             return
         if (event.position().toPoint() - self._drag_start_pos).manhattanLength() < 10:
             return
-        if self._drag_pending:
+        if self._drag_pending or self._drag_active:
             # mouseMoveEvent can fire again before the deferred
             # _start_drag() (scheduled via QTimer.singleShot(0, ...) below)
             # has actually run, since the timer only fires once the event
@@ -558,6 +559,7 @@ class FeatureCardWidget(QFrame):
         drag.setPixmap(self._pending_drag_pixmap)
         drag.setHotSpot(self._pending_drag_hotspot)
 
+        self._drag_active = True
         drag.exec(Qt.MoveAction)
 
         # Same liveness guard as above: drag.exec() pumps its own nested
@@ -569,6 +571,8 @@ class FeatureCardWidget(QFrame):
             self.isVisible()
         except RuntimeError:
             return
+        self._drag_active = False
+        drag.deleteLater()
         self.setCursor(Qt.OpenHandCursor)
         # Recreate the shadow effect fresh — the old one no longer
         # exists as a valid C++ object once it was detached.

@@ -18,6 +18,7 @@ This release uses version 1.0.0 and keeps existing project data compatible.
 - 🧲 Kept duplicate-ID and orphaned cards visible when reading malformed project files.
 - 🛡️ Blocked scripts, unsafe links, and local file images in imported rich text.
 - 🚧 Showed failed saves in a persistent footer and warned before closing.
+- 🧯 Guarded drag cleanup when a column is replaced during a drop.
 - 🧩 Pinned app and build packages with SHA-256 hashes.
 - 🎨 Added a simple matte board icon with several Windows sizes.
 - 📦 Replaced batch build tooling with a Windows MSI build, repair, and uninstall workflow.

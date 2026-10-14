@@ -1,3 +1,4 @@
+# 🙈 Leave local files out of Git.
 .venv/
 venv/
 __pycache__/

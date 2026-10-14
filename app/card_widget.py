@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QMimeData, QPoint, Signal, QTimer
 from PySide6.QtGui import QDrag, QColor
 from safe_html import safe_rich_text
+from card_tools import due_text, note_text, plain_tooltip
+import time
 
 from models import (
     Card, card_type_color, PRIORITY_COLORS, PRIORITY_LEVELS, priority_label, CARD_TYPES,
@@ -35,6 +37,8 @@ class FeatureCardWidget(QFrame):
     # rebuild needed -- see MainWindow._on_open_settings.
     double_click_opens_card = True
     focus_outlines = True
+    oled_mode = False
+    focus_color = "#0A84FF"
     # Default-on display setting: render card title/description text in
     # upper case, regardless of how it was typed. Class-level (same
     # reasoning as double_click_opens_card above) so toggling it in
@@ -82,7 +86,9 @@ class FeatureCardWidget(QFrame):
         self.setObjectName("FeatureCard")
         self.setFixedWidth(width)
         self.setCursor(Qt.OpenHandCursor)
-        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
+        policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
+        policy.setHeightForWidth(True)
+        self.setSizePolicy(policy)
 
         self._drag_start_pos: QPoint = QPoint()
         self._drag_active = False
@@ -204,8 +210,8 @@ class FeatureCardWidget(QFrame):
         and open the wrong card underneath. Keeping the border width
         constant keeps every card's height -- and everything below it --
         fixed regardless of selection state."""
-        color = card_type_color(self.card.card_type, self.custom_types)
-        border_color = "#0A84FF" if self._selected or (self.hasFocus() and self.focus_outlines) else "transparent"
+        color = "#000000" if self.oled_mode else card_type_color(self.card.card_type, self.custom_types)
+        border_color = self.focus_color if self._selected or (self.hasFocus() and self.focus_outlines) else ("#333333" if self.oled_mode else "transparent")
         self.setStyleSheet(
             f"#FeatureCard {{ background-color: {color}; "
             f"border: 2px solid {border_color}; }}"
@@ -277,7 +283,7 @@ class FeatureCardWidget(QFrame):
         # color and text are both left exactly as they were.
         type_icon = card_type_icon(self.card.card_type, self.custom_types)
         self.badge.setText(f"{type_icon} {self.card.card_type.upper()}")
-        self.badge.setToolTip(f"Type: {self.card.card_type}. Click to change.")
+        self.badge.setToolTip(plain_tooltip(f"Type: {self.card.card_type}. Click to change."))
         self.badge.setCursor(Qt.PointingHandCursor)
         self.badge.setAutoRaise(True)
         self.badge.setPopupMode(QToolButton.InstantPopup)
@@ -375,7 +381,8 @@ class FeatureCardWidget(QFrame):
             self.desc_label.setObjectName("CardDesc")
             self._set_desc_text(self.desc_label, self.card.description, self.card.description_is_html)
             self.desc_label.setWordWrap(True)
-            self.desc_label.setMaximumHeight(60)
+            self.desc_label.setMaximumHeight(72)
+            self.desc_label.setToolTip(plain_tooltip(note_text(self.card)[:2000]))
             # setAlignment (not just the QSS qproperty-alignment above)
             # covers rich-text descriptions too: QLabel applies this as
             # the QTextDocument's default block alignment, and it's safe
@@ -387,6 +394,29 @@ class FeatureCardWidget(QFrame):
             layout.addWidget(self.desc_label)
         else:
             self.desc_label = None
+
+        self.details_label = QLabel()
+        self.details_label.setTextFormat(Qt.PlainText)
+        self.details_label.setWordWrap(True)
+        self.details_label.setMaximumHeight(110)
+        self.details_label.setObjectName('CardDetails')
+        layout.addWidget(self.details_label)
+        self.refresh_metadata()
+
+    def refresh_metadata(self):
+        metadata = []
+        if self.card.labels:
+            metadata.append('🏷️ ' + ', '.join(self.card.labels))
+        if self.card.due_at is not None:
+            metadata.append('📅 ' + due_text(self.card.due_at, time.time()))
+        if self.card.reminder_at is not None:
+            metadata.append('⏰ Reminder sent' if self.card.reminder_sent_at is not None else '⏰ Reminder set')
+        if self.card.attachments:
+            metadata.append(f'📎 {len(self.card.attachments)} file(s)')
+        text = '\n'.join(metadata)
+        self.details_label.setText(text)
+        self.details_label.setToolTip(plain_tooltip(text))
+        self.details_label.setVisible(bool(text))
 
     @staticmethod
     def _set_desc_text(label: QLabel, text: str, is_html: bool):
@@ -404,6 +434,9 @@ class FeatureCardWidget(QFrame):
             label.setText(text)
 
     def _apply_shadow(self):
+        if self.oled_mode:
+            self.setGraphicsEffect(None)
+            return
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(14)
         shadow.setColor(QColor(0, 0, 0, 60))

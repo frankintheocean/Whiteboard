@@ -8,6 +8,7 @@ from file_io import atomic_write_json
 from typing import Dict, List, Optional
 
 from models import Project, CARD_TYPES
+from attachments import AttachmentStore
 
 
 def get_data_dir() -> str:
@@ -103,6 +104,7 @@ class Storage:
         # find and import it on first run against an old install.
         self.legacy_file_path = os.path.join(self.data_dir, "whiteboard_data.json")
         os.makedirs(self.projects_dir, exist_ok=True)
+        self.attachments = AttachmentStore(self.data_dir)
 
         self.projects: List[Project] = []
         self.active_project_id: Optional[str] = None
@@ -285,6 +287,9 @@ class Storage:
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             project = Project.from_dict(data)
+            embedded = isinstance(data, dict) and (data.get('attachment_files') or any('data' in a for c in project.cards for a in c.attachments))
+            if embedded:
+                self.attachments.import_project(project, data.get('attachment_files'))
         except (json.JSONDecodeError, OSError, TypeError, AttributeError, ValueError, UnicodeError):
             # Corrupt/unreadable project file: back it up and skip it,
             # rather than letting one bad project file take down the
@@ -302,7 +307,7 @@ class Storage:
         self._project_paths[project.id] = path
         if project_id != project.id:
             self._project_paths.pop(project_id, None)
-        if path == self._project_path(project.id):
+        if path == self._project_path(project.id) and not embedded:
             self._on_disk_hash[project.id] = _project_hash(project)
         return project
 

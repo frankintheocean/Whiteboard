@@ -159,7 +159,15 @@ class WorkspacePanel(QWidget):
         if self.model.cards:
             self.model.dataChanged.emit(self.model.index(0, 4), self.model.index(len(self.model.cards) - 1, 4), [Qt.DisplayRole])
         if self.project and self.project.view_filters.get('due'):
-            self.proxy.set_filters(self.project.view_filters)
+            expected = {c.id for c in self.project.cards if self.matches(c)}
+            shown = {c.id for column in self.window._column_widgets.values() for c in column._all_cards}
+            if expected != shown:
+                self.window._selected_card_ids.intersection_update(expected)
+                if self.window._selection_anchor not in expected:
+                    self.window._selection_anchor = None
+                self.window._refresh_all_columns()
+            else:
+                self.proxy.set_filters(self.project.view_filters)
         for column in self.window._column_widgets.values():
             for widget in column._card_widgets.values():
                 widget.refresh_metadata()

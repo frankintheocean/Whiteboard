@@ -1,4 +1,4 @@
-"""🗒️ Show a card with edit, drag, and selection actions."""
+"""🗒️ Edit, select, and drag task cards."""
 from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QGraphicsDropShadowEffect, QSizePolicy,
     QToolButton, QMenu, QCheckBox

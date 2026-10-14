@@ -1,4 +1,4 @@
-"""🗣️ Show card editors, settings, and project menus."""
+"""🗣️ Set card details and app preferences."""
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
     QComboBox, QDialogButtonBox, QToolButton,

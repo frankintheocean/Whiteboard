@@ -1,4 +1,4 @@
-"""🖱️ Check project menus, card input, scrolling, and text settings."""
+"""🖱️ Check menus, cards, and scrolling."""
 from unittest.mock import patch
 import pytest
 from PySide6.QtCore import Qt, QPoint, QPointF, QEvent, QPropertyAnimation

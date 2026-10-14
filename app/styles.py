@@ -1,4 +1,4 @@
-"""🎛️ Build the shared styles for 10 themes."""
+"""🎛️ Apply themes and readable focus marks."""
 from functools import lru_cache
 
 FONT_STACK = "'SF Pro Text', '.AppleSystemUIFont', 'Segoe UI Variable', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"

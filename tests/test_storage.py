@@ -1,4 +1,4 @@
-"""🗃️ Check saves, recovery, imports, and old data."""
+"""💽 Check saved files and recovery."""
 import json
 from pathlib import Path
 from unittest.mock import patch

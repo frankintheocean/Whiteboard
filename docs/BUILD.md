@@ -33,7 +33,7 @@ Use a fresh `WHITEBOARD_DATA_DIR` for manual checks. Try many projects, long nam
 Outputs:
 
 - `dist/WhiteBoard/WhiteBoard.exe` and its required files.
-- `dist_installer/WhiteBoard-1.0.0-x64.msi`.
+- `dist_installer/WhiteBoard-1.1.0-x64.msi`.
 
 The MSI installs to Program Files, adds a Start Menu shortcut, and supports standard Windows Installer repair and removal. User data lives outside the install folder.
 
@@ -47,6 +47,8 @@ Use a clean Windows test machine with admin permission:
 
 This installs the MSI, runs the installed app with an isolated data folder, deletes the executable, repairs and checks every app file, runs the app again, and uninstalls it. It checks that user data survives. Logs are saved in `build/output/`.
 
+To test an upgrade, download the verified 1.0.0 MSI from Releases and pass `--previous-installer <path>`. The script checks its published SHA-256 value, installs it, adds an old-format task and settings, and checks that the new MSI keeps them.
+
 Do not run this script on a machine with an existing WhiteBoard installation. For normal use, choose Repair or Remove in the MSI.
 
 ## 🗜️ Make the single-root ZIP
@@ -56,17 +58,17 @@ Do not run this script on a machine with an existing WhiteBoard installation. Fo
 .venv\Scripts\python build\package.py --installer
 ```
 
-`artifacts/WhiteBoard-1.0.0-complete.zip` includes source, resources, locks, docs, the built app, MSI, and third-party license files. `SHA256SUMS.txt` checks the release files. The ZIP contains its own file checksum list.
+`artifacts/WhiteBoard-1.1.0-complete.zip` includes source, resources, locks, docs, the built app, MSI, and third-party license files. `SHA256SUMS.txt` checks the release files. The ZIP contains its own file checksum list.
 
 Use `python build/package.py` for a source-only ZIP when no Windows installer has been built. It will not claim that an installer exists.
 
 ## 🛰️ Release through GitHub
 
-The Windows workflow tests and builds each main-branch change and pull request. It saves files and test logs as workflow artifacts. A `v1.0.0` tag builds the complete package and publishes a release only after tests and installer checks pass.
+The Windows workflow tests and builds each main-branch change and pull request. It saves files and test logs as workflow artifacts. A `v1.1.0` tag builds the complete package and publishes a release only after tests and installer checks pass.
 
 ```powershell
-git tag -a v1.0.0 -m "🚀 Release WhiteBoard 1.0.0"
-git push origin v1.0.0
+git tag -a v1.1.0 -m "🚀 Release WhiteBoard 1.1.0"
+git push origin v1.1.0
 ```
 
 Do not publish a passing source-only check as a Windows installer result. Files are unsigned unless a separate signing step is added with a real certificate.

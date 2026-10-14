@@ -1,15 +1,19 @@
-# 🎉 See what this release includes
+# 🎉 WhiteBoard 1.1.0
 
-The task board keeps its existing workflows and improves project menus, scrolling, fonts, keyboard access, and save safety.
+This release adds nine task and view tools while keeping existing boards and files compatible.
 
-- 📋 Full project names remain readable in long menus.
-- 🌀 Opening or editing cards no longer leaves a wheel animation running or resets column position.
-- 🔤 Settings has an app font picker and description size control.
-- 💾 Saves are atomic, failed saves stay visible, and unreadable files are kept for recovery.
-- 🔒 One app instance per data folder prevents conflicting writes.
-- 🛡️ Imported rich text blocks active content and local file images.
-- 📦 The Windows x64 MSI supports Install, Repair, and Uninstall. User data stays after removal.
+- 🔎 Search all projects.
+- ⏰ Due dates and local reminders.
+- 🏷️ Multiple labels on each card.
+- 📎 Verified file attachments and portable project exports.
+- 🧭 A command palette with Ctrl+K.
+- 📋 Board and sortable list views.
+- 🎚️ Saved views with filters, sorting, and widths.
+- ↔️ Column resizing by drag or menu.
+- 🌑 OLED Black themes with blue, mint, and purple accents.
 
-Download the MSI to install. The single-root ZIP includes all source, build tools, resources, docs, locks, the built app, and the MSI. Check `SHA256SUMS.txt` before use.
+The complete ZIP includes source, resources, locks, docs, the built Windows x64 app, and its MSI. The installer supports Install, Repair, and Uninstall. Check SHA256SUMS.txt before use.
 
-Windows build checks must pass before this release is published. The app and installer are unsigned. SF Pro is used when installed and is not bundled. Automated Windows checks use Server 2022; hands-on Windows 10/11 and screen-reader checks remain recommended.
+Reminders need WhiteBoard to be open and catch up at launch. Attachments are limited to 25 MB each and 100 MB of unique content per project. Executable files and shortcuts are blocked. Native notifications depend on Windows settings.
+
+The app and MSI are unsigned. SF Pro is preferred when installed and is not bundled. Automated Windows checks use Server 2022; hands-on Windows 10/11, screen-reader, and native-notification checks remain useful.

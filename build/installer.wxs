@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 📦 Install, repair, or remove WhiteBoard. User data is never removed. -->
+<!-- 📦 Add, restore, or remove the app without deleting projects. -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="WhiteBoard" Manufacturer="WhiteBoard" Version="1.0.0"
            UpgradeCode="82A67247-4475-4A72-94EA-9D0C81560858" Scope="perMachine" InstallerVersion="500">

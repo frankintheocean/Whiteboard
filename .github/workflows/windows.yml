@@ -1,3 +1,4 @@
+# 🚀 Build and check Windows releases before publishing.
 name: 🪟 Windows build and release
 on:
   push:

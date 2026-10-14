@@ -1,6 +1,6 @@
 """🏷️ Show the version and change notes."""
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 
 # 🕰️ Earlier releases stay in their original order.
 CHANGELOG = [('0.1.0-pre',
@@ -360,3 +360,15 @@ CHANGELOG = [('0.1.0-pre',
    '🧰 Kept malformed data for recovery and kept duplicate cards visible.',
    '⌨️ Added keyboard access to card editing and selection.',
    '📦 Added a Windows MSI installer with repair and uninstall.'])]
+
+CHANGELOG.append(('1.1.0', '2026-10-14', [
+    '🔎 Search cards across every project.',
+    '⏰ Set due dates and local reminders.',
+    '🏷️ Add several labels to a card.',
+    '📎 Attach files and include them in project exports.',
+    '🧭 Find actions and projects in the command palette.',
+    '📋 Switch between board and list views.',
+    '🎚️ Save filters, sorting, and widths as named views.',
+    '↔️ Resize columns by dragging or entering a width.',
+    '🌑 Choose OLED Black with blue, mint, or purple accents.',
+]))

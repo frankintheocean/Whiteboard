@@ -19,7 +19,7 @@ Your projects stay on your computer. The app saves changes as you work and runs 
 
 See [the user guide](docs/USER_GUIDE.md) for details and keyboard shortcuts.
 
-## ✨ New in 1.1.0
+## ✨ New in this version
 
 - 🔎 Search cards across all projects with Ctrl+F.
 - ⏰ Set due dates and reminders in the card editor.

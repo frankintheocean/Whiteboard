@@ -1,4 +1,4 @@
-"""🔔 Show short status messages inside the app."""
+"""🔔 Show short status messages."""
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QGraphicsOpacityEffect
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 
